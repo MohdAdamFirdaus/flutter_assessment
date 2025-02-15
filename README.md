@@ -1,3 +1,3 @@
-# hendshake_technical_assessment
+# Flutter_asssessment
 
 A new Flutter project.
