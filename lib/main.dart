@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hendshake_technical_assessment/history.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -7,8 +8,6 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -22,8 +21,6 @@ class MyApp extends StatelessWidget {
 }
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
-
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -31,6 +28,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   String activity = "Press 'Next' to get an activity";
   String price = "";
+  List<Map<String, String>> history = [];
 
   Future<void> fetchActivity() async {
     final response = await http.get(Uri.parse('https://bored.api.lewagon.com/api/activity'));
@@ -38,8 +36,11 @@ class _MainScreenState extends State<MainScreen> {
       final data = json.decode(response.body);
       setState(() {
         activity = data['activity'];
-       price = "Price: \$${data['price'].toString()}";
-
+        price = "Price: \$${data['price'].toString()}";
+        history.insert(0, {'activity': activity, 'price': price});
+        if (history.length > 50) {
+          history.removeLast();
+        }
       });
     } else {
       setState(() {
@@ -52,7 +53,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Main Screen')),
+      appBar: AppBar(title: Text('Main Screen')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -64,20 +65,30 @@ class _MainScreenState extends State<MainScreen> {
                   Text(
                     activity,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 18),
+                    style: TextStyle(fontSize: 18),
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: 10),
                   Text(
                     price,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
             ),
             ElevatedButton(
               onPressed: fetchActivity,
-              child: const Text('Next'),
+              child: Text('Next'),
+            ),
+            SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => HistoryScreen(history: history)),
+                );
+              },
+              child: Text('History'),
             ),
           ],
         ),
@@ -85,3 +96,5 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 }
+
+
